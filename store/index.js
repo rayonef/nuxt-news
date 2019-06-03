@@ -2,6 +2,7 @@
 import Vuex from 'vuex'
 import md5 from 'md5'
 import db from '@/plugins/firestore'
+import { saveUserData, clearUserData } from '@/utils'
 
 const createStore = () => {
   return new Vuex.Store({
@@ -43,17 +44,37 @@ const createStore = () => {
       async authenticateUser({ commit }, userPayload) {
         try {
           commit('setLoading', true)
-          const authUserData = await this.$axios.$post('/register/', userPayload)
-          const avatar = `http://gravatar.com/avatar/${md5(authUserData.email)}?d=identicon`
-          const user = { email: authUserData.email, avatar }
-          await db.collection('users').doc(userPayload.email).set(user)
+          const authUserData = await this.$axios.$post(`/${userPayload.action}/`, {
+            email: userPayload.email,
+            password: userPayload.password,
+            returnSecureToken: userPayload.returnSecureToken
+          })
+          let user
+          if (userPayload.action === 'register') {
+            const avatar = `http://gravatar.com/avatar/${md5(authUserData.email)}?d=identicon`
+            user = { email: authUserData.email, avatar }
+            await db.collection('users').doc(userPayload.email).set(user)
+          } else {
+            const loginRef = db.collection('users').doc(userPayload.email)
+            const loggedUser = await loginRef.get()
+            user = loggedUser.data()
+          }
           commit('setUser', user)
           commit('setToken', authUserData.idToken)
           commit('setLoading', false)
+          saveUserData(authUserData, user)
         } catch (error) {
           console.log(error)
           commit('setLoading', false)
         }
+      },
+      setLogoutTimer({ dispatch }, payload) {
+        setTimeout(() => dispatch('logoutUser'), payload)
+      },
+      logoutUser({ commit }) {
+        commit('setToken', null)
+        commit('setUser', null)
+        clearUserData()
       }
     },
     getters: {

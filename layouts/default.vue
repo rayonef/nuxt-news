@@ -56,7 +56,7 @@
             </v-avatar>
             {{ user.email }}
           </v-btn>
-          <v-btn flat>
+          <v-btn flat @click="logoutUser">
             Logout
           </v-btn>
         </template>
@@ -156,6 +156,9 @@ export default {
       this.$store.commit('setCountry', country)
       await this.$store.dispatch('loadHeadlines', `/api/top-headlines?country=${this.country}&category=${this.category}`)
       this.drawer = false
+    },
+    logoutUser() {
+      this.$store.dispatch('logoutUser')
     }
   }
 }

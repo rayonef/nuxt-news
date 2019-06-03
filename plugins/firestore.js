@@ -13,9 +13,9 @@ if (!firebase.apps.length) {
   }
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig)
-  firebase.firestore().settings({
-    timestampsInSnapshots: true
-  })
+  // firebase.firestore().settings({
+  //   timestampsInSnapshots: true
+  // })
 }
 
 const db = firebase.firestore()

@@ -76,6 +76,7 @@ export default {
     },
     async registerUser() {
       await this.$store.dispatch('authenticateUser', {
+        action: 'register',
         email: this.email,
         password: this.password,
         returnSecureToken: true

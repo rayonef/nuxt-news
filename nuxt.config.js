@@ -3,6 +3,9 @@ import pkg from './package'
 
 export default {
   mode: 'spa',
+  router: {
+    middleware: 'check-auth'
+  },
 
   /*
   ** Headers of the page
@@ -70,6 +73,10 @@ export default {
     '/register/': {
       target: 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyBniHm-iMtplIz4ZsXV8DKXyRhREdHv3yI',
       pathRewrite: { '^/register/': '' }
+    },
+    '/login/': {
+      target: 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyBniHm-iMtplIz4ZsXV8DKXyRhREdHv3yI',
+      pathRewrite: { '^/login/': '' }
     }
   },
   env: {
