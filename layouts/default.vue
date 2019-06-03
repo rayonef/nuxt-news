@@ -49,13 +49,13 @@
       </v-toolbar-title>
       <v-spacer />
       <v-toolbar-items>
-        <v-btn flat nuxt to="login">
+        <v-btn v-if="!isAuthenticated" flat nuxt to="login">
           Login
         </v-btn>
-        <v-btn flat nuxt to="register">
+        <v-btn v-if="!isAuthenticated" flat nuxt to="register">
           Register
         </v-btn>
-        <v-btn @click="rightDrawer = true">
+        <v-btn flat @click="rightDrawer = true">
           Categories
         </v-btn>
       </v-toolbar-items>
@@ -130,7 +130,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['category', 'loading', 'country'])
+    ...mapGetters(['category', 'loading', 'country', 'isAuthenticated'])
   },
   methods: {
     async loadCategory(category) {

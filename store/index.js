@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import Vuex from 'vuex'
 
 const createStore = () => {
@@ -6,7 +7,8 @@ const createStore = () => {
       headlines: [],
       category: '',
       loading: false,
-      country: 'mx'
+      country: 'mx',
+      token: null
     },
     mutations: {
       setHeadlines(state, headlines) {
@@ -20,6 +22,9 @@ const createStore = () => {
       },
       setCountry(state, country) {
         state.country = country
+      },
+      setToken(state, token) {
+        state.token = token
       }
     },
     actions: {
@@ -28,11 +33,23 @@ const createStore = () => {
         const { articles } = await this.$axios.$get(apiUrl)
         commit('setHeadlines', articles)
         commit('setLoading', false)
+      },
+      async authenticateUser({ commit }, userPayload) {
+        try {
+          commit('setLoading', true)
+          const authUserData = await this.$axios.$post('/register/', userPayload)
+          commit('setToken', authUserData.idToken)
+          commit('setLoading', false)
+        } catch (error) {
+          console.log(error)
+          commit('setLoading', false)
+        }
       }
     },
     getters: {
       headlines: state => state.headlines,
       category: state => state.category,
+      isAuthenticated: state => !!state.token,
       loading: state => state.loading,
       country: state => state.country
     }

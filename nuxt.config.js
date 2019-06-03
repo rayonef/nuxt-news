@@ -50,7 +50,8 @@ export default {
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
-    '@nuxtjs/proxy'
+    '@nuxtjs/proxy',
+    ['nuxt-validate', { lang: 'es' }]
   ],
   /*
   ** Axios module configuration
@@ -64,6 +65,10 @@ export default {
     '/api/': {
       target: 'https://newsapi.org/v2/',
       pathRewrite: { '^/api/': '' }
+    },
+    '/register/': {
+      target: 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyBniHm-iMtplIz4ZsXV8DKXyRhREdHv3yI',
+      pathRewrite: { '^/register/': '' }
     }
   },
   env: {
