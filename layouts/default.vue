@@ -49,12 +49,26 @@
       </v-toolbar-title>
       <v-spacer />
       <v-toolbar-items>
-        <v-btn v-if="!isAuthenticated" flat nuxt to="login">
-          Login
-        </v-btn>
-        <v-btn v-if="!isAuthenticated" flat nuxt to="register">
-          Register
-        </v-btn>
+        <template v-if="isAuthenticated">
+          <v-btn flat class="text-lowercase">
+            <v-avatar class="mr-2" size="28">
+              <v-img :src="user.avatar" />
+            </v-avatar>
+            {{ user.email }}
+          </v-btn>
+          <v-btn flat>
+            Logout
+          </v-btn>
+        </template>
+        <template v-else>
+          <v-btn flat nuxt to="login">
+            Login
+          </v-btn>
+          <v-btn flat nuxt to="register">
+            Register
+          </v-btn>
+        </template>
+
         <v-btn flat @click="rightDrawer = true">
           Categories
         </v-btn>
@@ -130,7 +144,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['category', 'loading', 'country', 'isAuthenticated'])
+    ...mapGetters(['category', 'loading', 'country', 'isAuthenticated', 'user'])
   },
   methods: {
     async loadCategory(category) {

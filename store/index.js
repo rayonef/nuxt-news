@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 import Vuex from 'vuex'
+import md5 from 'md5'
+import db from '@/plugins/firestore'
 
 const createStore = () => {
   return new Vuex.Store({
@@ -8,7 +10,8 @@ const createStore = () => {
       category: '',
       loading: false,
       country: 'mx',
-      token: null
+      token: null,
+      user: null
     },
     mutations: {
       setHeadlines(state, headlines) {
@@ -25,6 +28,9 @@ const createStore = () => {
       },
       setToken(state, token) {
         state.token = token
+      },
+      setUser(state, user) {
+        state.user = user
       }
     },
     actions: {
@@ -38,6 +44,10 @@ const createStore = () => {
         try {
           commit('setLoading', true)
           const authUserData = await this.$axios.$post('/register/', userPayload)
+          const avatar = `http://gravatar.com/avatar/${md5(authUserData.email)}?d=identicon`
+          const user = { email: authUserData.email, avatar }
+          await db.collection('users').doc(userPayload.email).set(user)
+          commit('setUser', user)
           commit('setToken', authUserData.idToken)
           commit('setLoading', false)
         } catch (error) {
@@ -51,7 +61,8 @@ const createStore = () => {
       category: state => state.category,
       isAuthenticated: state => !!state.token,
       loading: state => state.loading,
-      country: state => state.country
+      country: state => state.country,
+      user: state => state.user
     }
   })
 }

@@ -41,7 +41,8 @@ export default {
   */
   plugins: [
     '@/plugins/vuetify',
-    '@/plugins/axios'
+    '@/plugins/axios',
+    '@/plugins/firestore'
   ],
 
   /*
