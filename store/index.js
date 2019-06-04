@@ -12,7 +12,8 @@ const createStore = () => {
       loading: false,
       country: 'mx',
       token: null,
-      user: null
+      user: null,
+      feed: []
     },
     mutations: {
       setHeadlines(state, headlines) {
@@ -32,6 +33,9 @@ const createStore = () => {
       },
       setUser(state, user) {
         state.user = user
+      },
+      setFeed(state, headlines) {
+        state.feed = headlines
       }
     },
     actions: {
@@ -40,6 +44,24 @@ const createStore = () => {
         const { articles } = await this.$axios.$get(apiUrl)
         commit('setHeadlines', articles)
         commit('setLoading', false)
+      },
+      async addHeadlineToFeed({ state, commit }, headline) {
+        const feedRef = db
+          .collection(`users/${state.user.email}/feed`)
+          .doc(headline.title)
+        await feedRef.set(headline)
+      },
+      async loadUserFeed({ state, commit }) {
+        if (state.user) {
+          const feedRef = db.collection(`users/${state.user.email}/feed`)
+          await feedRef.onSnapshot((querySnapshot) => {
+            const headlines = []
+            querySnapshot.forEach((doc) => {
+              headlines.push(doc.data())
+            })
+            commit('setFeed', headlines)
+          })
+        }
       },
       async authenticateUser({ commit }, userPayload) {
         try {
@@ -72,6 +94,7 @@ const createStore = () => {
         setTimeout(() => dispatch('logoutUser'), payload)
       },
       logoutUser({ commit }) {
+        commit('setFeed', [])
         commit('setToken', null)
         commit('setUser', null)
         clearUserData()
@@ -83,7 +106,8 @@ const createStore = () => {
       isAuthenticated: state => !!state.token,
       loading: state => state.loading,
       country: state => state.country,
-      user: state => state.user
+      user: state => state.user,
+      userFeed: state => state.feed
     }
   })
 }

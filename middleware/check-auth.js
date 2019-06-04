@@ -1,10 +1,11 @@
-/* eslint-disable no-useless-return */
+/* eslint-disable */
 import { getUserFromCookie, getUserFromLocalStorage } from '@/utils'
 
 export default function ({ store, req }) {
   if (process.server && !req) return
 
   const userData = process.server ? getUserFromCookie(req) : getUserFromLocalStorage()
+  console.log(userData)
   if (!userData) {
     return
   } else if (!userData.jwt || Date.now() > userData.expiresIn) {

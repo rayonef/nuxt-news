@@ -20,6 +20,25 @@
           @change="changeCountry"
         />
       </v-container>
+      <v-list three-line>
+        <v-list-tile v-for="headline in userFeed" :key="headline.id" avatar>
+          <v-list-tile-avatar>
+            <img :src="headline.urlToImage" :alt="headline.title">
+          </v-list-tile-avatar>
+          <v-list-tile-content>
+            <v-list-tile-title>{{ headline.title }}</v-list-tile-title>
+            <v-list-tile-sub-title>{{ headline.source.name }}</v-list-tile-sub-title>
+            <v-list-tile-sub-title>View Comments</v-list-tile-sub-title>
+          </v-list-tile-content>
+          <v-list-tile-action>
+            <v-btn icon ripple>
+              <v-icon color="grey lighten-1">
+                delete
+              </v-icon>
+            </v-btn>
+          </v-list-tile-action>
+        </v-list-tile>
+      </v-list>
       <!-- <v-list>
         <v-list-tile
           v-for="(item, i) in items"
@@ -144,7 +163,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['category', 'loading', 'country', 'isAuthenticated', 'user'])
+    ...mapGetters(['category', 'loading', 'country', 'isAuthenticated', 'user', 'userFeed'])
   },
   methods: {
     async loadCategory(category) {

@@ -39,8 +39,13 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn icon>
-              <v-icon>bookmark</v-icon>
+            <v-btn
+              icon
+              @click="addHeadlineToFeed(headline)"
+            >
+              <v-icon :color="userFeed.findIndex(i => i.title === headline.title) > -1 ? 'green' : ''">
+                bookmark
+              </v-icon>
             </v-btn>
             <v-btn icon>
               <v-icon>message</v-icon>
@@ -53,15 +58,22 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
 export default {
   computed: {
-    headlines() {
-      return this.$store.getters.headlines
-    }
+    ...mapGetters(['headlines', 'user', 'userFeed'])
   },
   async fetch({ store }) {
-    await store.dispatch('loadHeadlines', '/api/top-headlines?country=mx')
+    await store.dispatch('loadHeadlines', `/api/top-headlines?country=${store.state.country}`)
+    await store.dispatch('loadUserFeed')
+  },
+  methods: {
+    async addHeadlineToFeed(headline) {
+      if (this.user) {
+        await this.$store.dispatch('addHeadlineToFeed', headline)
+      }
+    }
   }
 }
 </script>
