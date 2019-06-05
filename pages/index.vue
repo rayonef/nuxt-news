@@ -47,7 +47,7 @@
                 bookmark
               </v-icon>
             </v-btn>
-            <v-btn icon>
+            <v-btn icon @click="saveHeadline(headline)">
               <v-icon>message</v-icon>
             </v-btn>
           </v-card-actions>
@@ -73,6 +73,12 @@ export default {
       if (this.user) {
         await this.$store.dispatch('addHeadlineToFeed', headline)
       }
+    },
+    async saveHeadline(headline) {
+      await this.$store.dispatch('saveHeadline', headline)
+        .then(() => {
+          this.$router.push(`/headlines/${headline.slug}`)
+        })
     }
   }
 }

@@ -20,7 +20,26 @@
           @change="changeCountry"
         />
       </v-container>
-      <v-list three-line>
+
+      <!-- Default Markup (if Feed Empty) -->
+      <EmptyState
+        v-if="userFeed.length === 0 && !user"
+        icon="bookmark_border"
+        color="primary"
+        title="Nothing in Feed"
+        description="Login to bookmark headlines"
+      />
+
+      <EmptyState
+        v-else-if="userFeed.length === 0"
+        icon="bookmark_border"
+        color="primary"
+        title="Nothing in Feed"
+        description="Anything you bookmark will be safely stored here"
+      />
+
+      <!-- Feed content -->
+      <v-list v-else three-line>
         <v-list-tile v-for="headline in userFeed" :key="headline.id" avatar>
           <v-list-tile-avatar>
             <img :src="headline.urlToImage" :alt="headline.title">
@@ -31,7 +50,7 @@
             <v-list-tile-sub-title>View Comments</v-list-tile-sub-title>
           </v-list-tile-content>
           <v-list-tile-action>
-            <v-btn icon ripple>
+            <v-btn icon ripple @click="removeHeadlineFromFeed(headline)">
               <v-icon color="grey lighten-1">
                 delete
               </v-icon>
@@ -138,6 +157,7 @@
 import { mapGetters } from 'vuex'
 
 export default {
+  components: { EmptyState: () => import('@/components/EmptyState') },
   data() {
     return {
       clipped: false,
@@ -175,6 +195,9 @@ export default {
       this.$store.commit('setCountry', country)
       await this.$store.dispatch('loadHeadlines', `/api/top-headlines?country=${this.country}&category=${this.category}`)
       this.drawer = false
+    },
+    async removeHeadlineFromFeed(headline) {
+      await this.$store.dispatch('removeHeadlineFromFeed', headline)
     },
     logoutUser() {
       this.$store.dispatch('logoutUser')

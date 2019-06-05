@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import Vuex from 'vuex'
 import md5 from 'md5'
+import slugify from 'slugify'
 import db from '@/plugins/firestore'
 import { saveUserData, clearUserData } from '@/utils'
 
@@ -13,7 +14,8 @@ const createStore = () => {
       country: 'mx',
       token: null,
       user: null,
-      feed: []
+      feed: [],
+      headline: null
     },
     mutations: {
       setHeadlines(state, headlines) {
@@ -36,16 +38,37 @@ const createStore = () => {
       },
       setFeed(state, headlines) {
         state.feed = headlines
+      },
+      setHeadline(state, headline) {
+        state.headline = headline
       }
     },
     actions: {
       async loadHeadlines({ commit }, apiUrl) {
         commit('setLoading', true)
         const { articles } = await this.$axios.$get(apiUrl)
-        commit('setHeadlines', articles)
+        const headlines = articles.map((article) => {
+          const slug = slugify(article.title, {
+            replacement: '-',
+            remove: /[^a-zA-Z0-9 -]/g,
+            lower: true
+          })
+          const headline = { ...article, slug }
+          return headline
+        })
+        commit('setHeadlines', headlines)
         commit('setLoading', false)
       },
-      async addHeadlineToFeed({ state, commit }, headline) {
+      async loadHeadline({ commit }, slug) {
+        const headlineRef = db.collection('headlines').doc(slug)
+        await headlineRef.get().then((doc) => {
+          if (doc.exists) {
+            const headline = doc.data()
+            commit('setHeadline', headline)
+          }
+        })
+      },
+      async addHeadlineToFeed({ state }, headline) {
         const feedRef = db
           .collection(`users/${state.user.email}/feed`)
           .doc(headline.title)
@@ -62,6 +85,23 @@ const createStore = () => {
             commit('setFeed', headlines)
           })
         }
+      },
+      async saveHeadline({ commit }, headline) {
+        const headlineRef = db.collection('headlines').doc(headline.slug)
+        let headlineId
+        await headlineRef.get().then((doc) => {
+          if (doc.exists) {
+            headlineId = doc.id
+          }
+        })
+
+        if (!headlineId) {
+          await headlineRef.set(headline)
+        }
+      },
+      async removeHeadlineFromFeed({ commit, state }, headline) {
+        const headlineRef = db.collection(`users/${state.user.email}/feed`).doc(headline.title)
+        await headlineRef.delete()
       },
       async authenticateUser({ commit }, userPayload) {
         try {
@@ -107,7 +147,8 @@ const createStore = () => {
       loading: state => state.loading,
       country: state => state.country,
       user: state => state.user,
-      userFeed: state => state.feed
+      userFeed: state => state.feed,
+      headline: state => state.headline
     }
   })
 }
