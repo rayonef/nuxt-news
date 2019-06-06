@@ -47,7 +47,9 @@
           <v-list-tile-content>
             <v-list-tile-title>{{ headline.title }}</v-list-tile-title>
             <v-list-tile-sub-title>{{ headline.source.name }}</v-list-tile-sub-title>
-            <v-list-tile-sub-title>View Comments</v-list-tile-sub-title>
+            <v-list-tile-sub-title style="cursor: pointer;" @click="saveHeadline(headline)">
+              View Comments
+            </v-list-tile-sub-title>
           </v-list-tile-content>
           <v-list-tile-action>
             <v-btn icon ripple @click="removeHeadlineFromFeed(headline)">
@@ -99,19 +101,63 @@
           </v-btn>
         </template>
         <template v-else>
-          <v-btn flat nuxt to="login">
+          <v-btn flat nuxt to="/login">
             Login
           </v-btn>
-          <v-btn flat nuxt to="register">
+          <v-btn flat nuxt to="/register">
             Register
           </v-btn>
         </template>
 
+        <v-btn flat @click="showSearchDialog = true">
+          Search
+        </v-btn>
         <v-btn flat @click="rightDrawer = true">
           Categories
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
+
+    <v-dialog v-model="showSearchDialog" max-width="350">
+      <v-card>
+        <v-card-title class="title">
+          Search Headlines
+        </v-card-title>
+        <v-card-text>
+          <v-text-field
+            v-model="query"
+            label="search Term(s)"
+            placeholder="Use quotes for exact matches, AND / OR / NOY for multiple terms"
+            counter="30"
+          />
+          <DatePicker
+            v-model="fromDate"
+            label="Starting date (optional)"
+          />
+          <DatePicker
+            v-model="toDate"
+            label="Ending date (optional)"
+          />
+          <v-select
+            v-model="sortBy"
+            :items="sortingOptions"
+            label="Sort by"
+            item-text="name"
+            item-value="value"
+          />
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn flat @click="showSearchDialog = false">
+            Cancel
+          </v-btn>
+          <v-btn flat color="primary" @click="searchHeadlines">
+            Search
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-content>
       <nuxt />
     </v-content>
@@ -157,13 +203,21 @@
 import { mapGetters } from 'vuex'
 
 export default {
-  components: { EmptyState: () => import('@/components/EmptyState') },
+  components: {
+    EmptyState: () => import('@/components/EmptyState'),
+    DatePicker: () => import('@/components/DatePicker')
+  },
   data() {
     return {
       clipped: false,
       drawer: false,
       fixed: false,
       rightDrawer: false,
+      showSearchDialog: false,
+      query: '',
+      fromDate: null,
+      toDate: null,
+      sortBy: null,
       newsCategories: [
         { name: 'Top Headlines', path: '', icon: 'today' },
         { name: 'Technology', path: 'technology', icon: 'keyboard' },
@@ -179,6 +233,11 @@ export default {
         { name: 'Canada', value: 'ca' },
         { name: 'Germany', value: 'de' },
         { name: 'Russia', value: 'ru' }
+      ],
+      sortingOptions: [
+        { name: 'Newest (Default)', value: 'publishedAt' },
+        { name: 'Relevant', value: 'relevancy' },
+        { name: 'Popular', value: 'popularity' }
       ]
     }
   },
@@ -199,8 +258,23 @@ export default {
     async removeHeadlineFromFeed(headline) {
       await this.$store.dispatch('removeHeadlineFromFeed', headline)
     },
+    async searchHeadlines() {
+      await this.$store.dispatch('loadHeadlines', `/api/everything?q=${this.query}&from=${this.dateToISOString(this.fromDate)}$to=${this.dateToISOString(this.toDate)}&sortBy=${this.sortBy}`)
+      this.showSearchDialog = false
+    },
+    async saveHeadline(headline) {
+      await this.$store.dispatch('saveHeadline', headline)
+        .then(() => {
+          this.$router.push(`/headlines/${headline.slug}`)
+        })
+    },
     logoutUser() {
       this.$store.dispatch('logoutUser')
+    },
+    dateToISOString(date) {
+      if (date) {
+        return new Date(date).toISOString()
+      }
     }
   }
 }

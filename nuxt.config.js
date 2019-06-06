@@ -36,7 +36,8 @@ export default {
   ** Global CSS
   */
   css: [
-    '~/assets/style/app.styl'
+    '~/assets/style/app.styl',
+    { src: '~/assets/theme.scss', lang: 'scss' }
   ],
 
   /*
@@ -45,7 +46,8 @@ export default {
   plugins: [
     '@/plugins/vuetify',
     '@/plugins/axios',
-    '@/plugins/firestore'
+    '@/plugins/firestore',
+    '@/plugins/filters'
   ],
 
   /*
@@ -55,6 +57,7 @@ export default {
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
     '@nuxtjs/proxy',
+    ['@nuxtjs/moment', { locales: ['es'], defaultLocale: 'es' }],
     ['nuxt-validate', { lang: 'es' }]
   ],
   /*

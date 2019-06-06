@@ -14,7 +14,7 @@
           <v-card-title>
             <a class="news-title" :href="headline.title" target="_blank">{{ headline.title }}</a>
             <v-layout column class="px-2 mt-3">
-              <div>
+              <div style="cursor: pointer" @click="loadSource(headline.source.id)">
                 {{ headline.source.name }}
                 <v-icon small>
                   book
@@ -27,7 +27,7 @@
                 </v-icon>
               </div>
               <div class="caption">
-                {{ headline.publishedAt }}
+                {{ headline.publishedAt | timeAgo }}
                 <v-icon small>
                   alarm
                 </v-icon>
@@ -62,13 +62,19 @@ import { mapGetters } from 'vuex'
 
 export default {
   computed: {
-    ...mapGetters(['headlines', 'user', 'userFeed'])
+    ...mapGetters(['headlines', 'user', 'userFeed', 'source'])
   },
   async fetch({ store }) {
     await store.dispatch('loadHeadlines', `/api/top-headlines?country=${store.state.country}`)
     await store.dispatch('loadUserFeed')
   },
   methods: {
+    async loadSource(sourceId) {
+      if (sourceId) {
+        this.$store.commit('setSource', sourceId)
+        await this.$store.dispatch('loadHeadlines', `/api/top-headlines?sources=${this.source}`)
+      }
+    },
     async addHeadlineToFeed(headline) {
       if (this.user) {
         await this.$store.dispatch('addHeadlineToFeed', headline)

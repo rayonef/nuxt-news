@@ -55,7 +55,7 @@
             </v-list-tile-avatar>
             <v-list-tile-content>
               <v-list-tile-title>
-                {{ comment.user.username }} - {{ comment.publishAt }}
+                {{ comment.user.username }} - <span class="caption">{{ comment.publishAt | timeAgo }}</span>
               </v-list-tile-title>
               <v-list-tile-sub-title>
                 {{ comment.text }}
